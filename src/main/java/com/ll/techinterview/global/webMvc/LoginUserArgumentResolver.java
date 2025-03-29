@@ -30,27 +30,27 @@ public class LoginUserArgumentResolver implements HandlerMethodArgumentResolver 
         NativeWebRequest webRequest, WebDataBinderFactory binderFactory
     ) {
 
-        //for test
-        MemberResponse memberResponse = MemberResponse.builder()
-            .id(1L)
-            .nickname("test")
-            .build();
-        return memberResponse;
+//        //for test
+//        MemberResponse memberResponse = MemberResponse.builder()
+//            .id(1L)
+//            .nickname("test")
+//            .build();
+//        return memberResponse;
 //
-//        String username = webRequest.getHeader("X-Username");
-//
-//        if (username == null) {
-//            log.debug("X-Username header not found");
-//            return null;
-//        }
-//
-//        try {
-//             return memberServiceClient.getMemberByUsername(username);
-//
-////            return memberDto;
-//        } catch (NumberFormatException e) {
-//            log.error("Invalid userId format: {}", username, e);
-//            return null;
-//        }
+        String username = webRequest.getHeader("X-Username");
+
+        if (username == null) {
+            log.debug("X-Username header not found");
+            return null;
+        }
+
+        try {
+             return memberServiceClient.getMemberByUsername(username);
+
+//            return memberDto;
+        } catch (NumberFormatException e) {
+            log.error("Invalid userId format: {}", username, e);
+            return null;
+        }
     }
 }
