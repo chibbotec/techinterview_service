@@ -38,6 +38,8 @@ dependencies {
     //mongodb
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
 
+    //actuator 설정
+    implementation ("org.springframework.boot:spring-boot-starter-actuator")
 }
 
 tasks.withType<Test> {
