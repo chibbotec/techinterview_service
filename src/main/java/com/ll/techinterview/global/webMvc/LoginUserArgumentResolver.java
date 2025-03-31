@@ -1,5 +1,6 @@
 package com.ll.techinterview.global.webMvc;
 
+
 import com.ll.techinterview.global.client.MemberResponse;
 import com.ll.techinterview.global.client.MemberServiceClient;
 import lombok.RequiredArgsConstructor;
@@ -16,41 +17,32 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 @RequiredArgsConstructor
 public class LoginUserArgumentResolver implements HandlerMethodArgumentResolver {
 
-    private final MemberServiceClient memberServiceClient;
+  private final MemberServiceClient memberServiceClient;
 
-    @Override
-    public boolean supportsParameter(MethodParameter parameter) {
-        return parameter.hasParameterAnnotation(LoginUser.class) &&
-            parameter.getParameterType().equals(MemberResponse.class);
+  @Override
+  public boolean supportsParameter(MethodParameter parameter) {
+    return parameter.hasParameterAnnotation(LoginUser.class) &&
+        parameter.getParameterType().equals(MemberResponse.class);
+  }
+
+  @Override
+  public Object resolveArgument(
+      MethodParameter parameter, ModelAndViewContainer mavContainer,
+      NativeWebRequest webRequest, WebDataBinderFactory binderFactory
+  ) {
+
+    String username = webRequest.getHeader("X-Username");
+
+    if (username == null) {
+      log.debug("X-Username header not found");
+      return null;
     }
 
-    @Override
-    public Object resolveArgument(
-        MethodParameter parameter, ModelAndViewContainer mavContainer,
-        NativeWebRequest webRequest, WebDataBinderFactory binderFactory
-    ) {
-
-//        //for test
-//        MemberResponse memberResponse = MemberResponse.builder()
-//            .id(1L)
-//            .nickname("test")
-//            .build();
-//        return memberResponse;
-//
-        String username = webRequest.getHeader("X-Username");
-
-        if (username == null) {
-            log.debug("X-Username header not found");
-            return null;
-        }
-
-        try {
-             return memberServiceClient.getMemberByUsername(username);
-
-//            return memberDto;
-        } catch (NumberFormatException e) {
-            log.error("Invalid userId format: {}", username, e);
-            return null;
-        }
+    try {
+      return memberServiceClient.getMemberByUsername(username);
+    } catch (NumberFormatException e) {
+      log.error("Invalid userId format: {}", username, e);
+      return null;
     }
+  }
 }

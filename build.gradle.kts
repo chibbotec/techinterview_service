@@ -31,10 +31,6 @@ dependencies {
     runtimeOnly("com.mysql:mysql-connector-j")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-    //kafka
-    implementation("org.springframework.kafka:spring-kafka")
-    testImplementation("org.springframework.kafka:spring-kafka-test")
-
     //mongodb
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
 
