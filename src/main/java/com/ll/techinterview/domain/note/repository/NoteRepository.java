@@ -11,4 +11,6 @@ public interface NoteRepository extends MongoRepository<Note, String> {
   List<Note> findAllBySpaceIdAndPublicAccess(Long spaceId, boolean isPublic);
 
   List<Note> findAllBySpaceIdAndAuthor_Id(Long spaceId, Long id);
+
+  List<Note> findBySpaceId(Long spaceId);
 }
