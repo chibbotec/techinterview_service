@@ -1,4 +1,4 @@
-package com.ll.techinterview.domain.qna.dto;
+package com.ll.techinterview.domain.qna.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

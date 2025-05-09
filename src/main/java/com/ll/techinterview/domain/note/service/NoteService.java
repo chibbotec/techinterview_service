@@ -61,6 +61,7 @@ public class NoteService {
     return NoteResponse.of(noteRepository.save(note));
   }
 
+  @Transactional
   public NoteResponse updateNote(String noteId, MemberResponse loginUser, NoteRequest noteRequest) {
     // 1. 노트 찾기
     Note note = noteRepository.findById(noteId)

@@ -1,8 +1,9 @@
 package com.ll.techinterview.domain.qna.controller;
 
-import com.ll.techinterview.domain.qna.dto.QuestionAnswerRequest;
-import com.ll.techinterview.domain.qna.dto.QuestionCreateRequest;
+import com.ll.techinterview.domain.qna.dto.request.QuestionAnswerRequest;
+import com.ll.techinterview.domain.qna.dto.request.QuestionCreateRequest;
 import com.ll.techinterview.domain.qna.dto.QuestionResponse;
+import com.ll.techinterview.domain.qna.dto.request.SearchCondition;
 import com.ll.techinterview.domain.qna.service.QuestionService;
 import com.ll.techinterview.global.client.MemberResponse;
 import com.ll.techinterview.global.webMvc.LoginUser;
@@ -76,5 +77,13 @@ public class ApiV1QuestionController {
       @PathVariable("spaceId") Long spaceId,
       @RequestBody MemberResponse request) {
     return ResponseEntity.ok(questionService.removeParticipant(spaceId, request));
+  }
+
+  @PostMapping("/search")
+  public ResponseEntity<List<QuestionResponse>> search(
+      @PathVariable("spaceId") Long spaceId,
+      @RequestBody SearchCondition searchCondition
+  ){
+    return ResponseEntity.ok(questionService.searchQuestions(spaceId, searchCondition));
   }
 }

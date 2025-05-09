@@ -47,6 +47,10 @@ public enum ErrorCode {
     TECH_INTERVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 기술면접을 찾을 수 없습니다."),
     NOT_PARTICIPANT(HttpStatus.FORBIDDEN, "참여자가 아닙니다."),
     ADD_PARTICIPANT_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "참여자 추가에 실패했습니다."),
+    PARTICIPANT_NOT_FOUND(HttpStatus.NOT_FOUND, "참여자를 찾을 수 없습니다."),
+    PROBLEM_NOT_FOUND(HttpStatus.NOT_FOUND, "문제를 찾을 수 없습니다."),
+
+    CONTEST_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 대회를 찾을 수 없습니다."),
 
     //S3
     S3_UPLOAD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "S3 업로드 중 오류가 발생했습니다.");

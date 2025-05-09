@@ -1,5 +1,6 @@
 package com.ll.techinterview.global.client;
 
+import com.ll.techinterview.domain.contest.service.Submit;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,4 +17,5 @@ public class MemberResponse {
   private String username;
   private String email;
   private String nickname;
+  private Submit submit;
 }

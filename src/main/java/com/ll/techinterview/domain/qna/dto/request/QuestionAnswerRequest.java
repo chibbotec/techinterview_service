@@ -1,6 +1,5 @@
-package com.ll.techinterview.domain.qna.dto;
+package com.ll.techinterview.domain.qna.dto.request;
 
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,8 +9,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class QuestionCreateRequest {
-  private String questionText;
+public class QuestionAnswerRequest {
+  private String questionId;
+  private String answerText;
   private String techClass;
-  private List<SpaceMemberRequest> participants;
 }
