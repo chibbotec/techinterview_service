@@ -13,6 +13,18 @@ spring:
         format_sql: true
         use_sql_comments: true
         default_batch_fetch_size: 100
+        generate_statistics: true
+        session.events.log.LOG_QUERIES_SLOWER_THAN_MS: 25
+decorator:
+  datasource:
+    p6spy:
+      enable-logging: true
+      multiline: true
+      logging: slf4j
+    datasource-proxy:
+      query:
+        enable-logging: true
+      count-query: true
 services:
   member:
     url: http://localhost:9020 # 회원 서비스 URL

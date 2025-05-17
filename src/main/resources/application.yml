@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: techinterview
   profiles:
     active: dev
     include: secret
@@ -16,3 +18,12 @@ management:
   endpoint:
     health:
       show-details: always
+  info:
+    env:
+      enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    export:
+      prometheus:
+        enabled: true
