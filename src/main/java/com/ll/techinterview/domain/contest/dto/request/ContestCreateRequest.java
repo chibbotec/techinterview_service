@@ -32,8 +32,6 @@ public class ContestCreateRequest {
   @NoArgsConstructor
   @AllArgsConstructor
   public static class ProblemRequest{
-    private String techClass;
-    private String questionText;
-    private String aiAnswer;
+    private Long problemId;
   }
 }

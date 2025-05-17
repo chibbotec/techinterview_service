@@ -1,6 +1,6 @@
 package com.ll.techinterview.domain.contest.dto.response;
 
-import com.ll.techinterview.domain.contest.document.Answer;
+import com.ll.techinterview.domain.contest.entity.Answer;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;

@@ -1,6 +1,6 @@
 package com.ll.techinterview.domain.contest.repository;
 
-import com.ll.techinterview.domain.contest.document.Contest;
+import com.ll.techinterview.domain.contest.entity.Contest;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

@@ -1,4 +1,4 @@
-package com.ll.techinterview.domain.contest.service;
+package com.ll.techinterview.global.techEnum;
 
 public enum Submit {
   IN_PROGRESS, //진행중

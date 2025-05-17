@@ -1,7 +1,7 @@
-package com.ll.techinterview.domain.contest.document;
+package com.ll.techinterview.domain.contest.entity;
 
+import com.ll.techinterview.global.jpa.TechInterview;
 import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
@@ -24,17 +24,13 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 @Entity
-public class Problem {
+public class Problem{
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  private String techClass;
-
-  private String problem;
-
-  @Column(columnDefinition = "TEXT")
-  private String aiAnswer;
+  @ManyToOne
+  private TechInterview techInterview;
 
   @OneToMany(mappedBy = "problem", cascade = CascadeType.ALL)
   private List<Answer> answers;

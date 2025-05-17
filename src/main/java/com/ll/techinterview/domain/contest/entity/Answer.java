@@ -1,4 +1,4 @@
-package com.ll.techinterview.domain.contest.document;
+package com.ll.techinterview.domain.contest.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

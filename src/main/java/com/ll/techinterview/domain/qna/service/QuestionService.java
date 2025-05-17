@@ -1,21 +1,31 @@
 package com.ll.techinterview.domain.qna.service;
 
-import com.ll.techinterview.domain.qna.document.Question;
-import com.ll.techinterview.domain.qna.dto.QuestionResponse;
+
 import com.ll.techinterview.domain.qna.dto.request.QuestionAnswerRequest;
 import com.ll.techinterview.domain.qna.dto.request.QuestionCreateRequest;
 import com.ll.techinterview.domain.qna.dto.request.SearchCondition;
-import com.ll.techinterview.domain.qna.dto.request.SpaceMemberRequest;
+import com.ll.techinterview.domain.qna.dto.response.QuestionResponse;
+import com.ll.techinterview.domain.qna.entity.Comment;
+import com.ll.techinterview.domain.qna.entity.ParticipantQnA;
+import com.ll.techinterview.domain.qna.entity.Question;
 import com.ll.techinterview.domain.qna.repository.QuestionRepository;
+import com.ll.techinterview.domain.qna.repository.TechInterviewRepository;
 import com.ll.techinterview.global.client.MemberResponse;
 import com.ll.techinterview.global.error.ErrorCode;
 import com.ll.techinterview.global.exception.CustomException;
+import com.ll.techinterview.global.jpa.TechInterview;
+import com.ll.techinterview.global.techEnum.TechClass;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,36 +35,59 @@ import org.springframework.transaction.annotation.Transactional;
 public class QuestionService {
 
   private final QuestionRepository questionRepository;
-  private final MongoTemplate mongoTemplate;
+  private final TechInterviewRepository techInterviewRepository;
+  @PersistenceContext  // 추가: EntityManager 주입
+  private EntityManager entityManager;
 
   @Transactional
   public QuestionResponse createQuestion(MemberResponse loginUser, Long spaceId,
       QuestionCreateRequest request) {
-    Question question = Question.builder()
-        .spaceId(spaceId)
+
+    // 1. TechInterview 객체 생성 및 저장
+    TechInterview techInterview = TechInterview.builder()
         .techClass(request.getTechClass())
-        .questionText(request.getQuestionText())
+        .question(request.getQuestionText())
         .build();
 
-    // 질문자 추가
-    question.addAuthor(loginUser.getId(), loginUser.getNickname());
+    TechInterview savedTechInterview = techInterviewRepository.save(techInterview);
 
-    // 참여자 추가
-    for (SpaceMemberRequest participant : request.getParticipants()) {
-      Long id = participant.getId();
-      String nickname = participant.getNickname();
-      question.addParticipant(id, nickname);
-    }
+    // 2. Question 객체 생성
+    Question question = Question.builder()
+        .spaceId(spaceId)
+        .authorId(loginUser.getId())
+        .authorNickname(loginUser.getNickname())
+        .techInterview(savedTechInterview)  // 중요: 저장된 TechInterview 설정
+        .comments(new ArrayList<>())
+        .participants(new ArrayList<>())
+        .build();
 
-    return QuestionResponse.of(questionRepository.save(question));
+    // 3. ParticipantQnA 객체 생성 및 양방향 관계 설정
+    List<ParticipantQnA> participants = request.getParticipants().stream().map(
+        participantRequest -> {
+          ParticipantQnA participant = ParticipantQnA.builder()
+              .memberId(participantRequest.getId())
+              .nickname(participantRequest.getNickname())
+              .build();
+          participant.setQuestion(question); // 양방향 관계의 주인쪽 설정
+          return participant;
+        }
+    ).collect(Collectors.toList());
+
+    // 4. Question에 participants 설정
+    question.setParticipants(participants);
+
+    // 5. Question 저장 및 반환
+    Question savedQuestion = questionRepository.save(question);
+    return QuestionResponse.of(savedQuestion);
   }
+
 
   public List<QuestionResponse> getQuestionList(Long spaceId) {
     List<Question> questions = questionRepository.findBySpaceId(spaceId);
     return questions.stream().map(QuestionResponse::of).toList();
   }
 
-  public QuestionResponse getQuestion(String id) {
+  public QuestionResponse getQuestion(Long id) {
 
     Question question = questionRepository.findById(id)
         .orElseThrow(() -> new CustomException(ErrorCode.TECH_INTERVIEW_NOT_FOUND));
@@ -70,84 +103,90 @@ public class QuestionService {
       Question question = optionalQuestion.get();
 
       // 참여자인지 확인
-      if (question.findParticipantById(loginUser.getId()).isEmpty()) {
+      if (!question.isParticipant(loginUser.getId())) {
         throw new CustomException(ErrorCode.NOT_PARTICIPANT);
       }
 
       String answerText = request.getAnswerText();
 
-      question.addAnswer(loginUser.getId(), answerText);
+      // 참여자 정보 가져오기 - 참여자 ID로 ParticipantQnA 찾기
+      ParticipantQnA participant = findParticipantByMemberId(question, loginUser.getId());
+
+      // 새 Comment 객체 생성
+      Comment comment = Comment.builder()
+          .question(question)
+          .participantQna(participant)
+          .comment(answerText)
+          .build();
+
+      question.addComment(comment);
+
       return QuestionResponse.of(questionRepository.save(question));
     }
 
     throw new CustomException(ErrorCode.TECH_INTERVIEW_NOT_FOUND);
   }
 
-  // 참여자 추가
   @Transactional
-  public List<QuestionResponse> addParticipant(Long spaceId, MemberResponse request) {
-
-    List<Question> questions = questionRepository.findBySpaceId(spaceId);
-
-    if (questions.isEmpty()) {
-      throw new CustomException(ErrorCode.TECH_INTERVIEW_NOT_FOUND);
-    }
-
-    for (Question question : questions) {
-      question.addParticipant(request.getId(), request.getNickname());
-      questionRepository.save(question);
-    }
-
-    return questions.stream().map(QuestionResponse::of).toList();
-  }
-
-  // 참여자 제거
-  @Transactional
-  public List<QuestionResponse> removeParticipant(Long spaceId, MemberResponse request) {
-    List<Question> questions = questionRepository.findBySpaceId(spaceId);
-
-    if (questions.isEmpty()) {
-      throw new CustomException(ErrorCode.TECH_INTERVIEW_NOT_FOUND);
-    }
-
-    for (Question question : questions) {
-      question.removeParticipant(request.getId());
-      questionRepository.save(question);
-    }
-
-    return questions.stream().map(QuestionResponse::of).toList();
-  }
-
-  @Transactional
-  public void deleteQuestion(String id) {
+  public void deleteQuestion(Long id) {
     Question question = questionRepository.findById(id)
         .orElseThrow(() -> new CustomException(ErrorCode.TECH_INTERVIEW_NOT_FOUND));
     questionRepository.delete(question);
   }
 
   public List<QuestionResponse> searchQuestions(Long spaceId, SearchCondition searchCondition) {
-    Criteria criteria = Criteria.where("spaceId").is(spaceId);
+    // 기본 검색 조건: spaceId 일치
+    StringBuilder jpql = new StringBuilder("SELECT q FROM Question q JOIN q.techInterview t WHERE q.spaceId = :spaceId");
 
-    // 조건에 따라 criteria 추가
-    if (searchCondition != null) {
-      if (searchCondition.getTechClass() != null) {
-        criteria.and("techClass").is(searchCondition.getTechClass());
-      }
-      if (searchCondition.getStartDate() != null && searchCondition.getEndDate() != null) {
-        criteria.and("createdAt").gte(searchCondition.getStartDate())
-            .lte(searchCondition.getEndDate());
-      } else if (searchCondition.getStartDate() != null) {
-        criteria.and("createdAt").gte(searchCondition.getStartDate());
-      } else if (searchCondition.getEndDate() != null) {
-        criteria.and("createdAt").lte(searchCondition.getEndDate());
+    // 파라미터 맵 생성
+    Map<String, Object> parameters = new HashMap<>();
+    parameters.put("spaceId", spaceId);
+
+    // TechClass 조건 추가
+    if (searchCondition.getTechClass() != null && !searchCondition.getTechClass().isEmpty()) {
+      jpql.append(" AND t.techClass = :techClass");
+      try {
+        // String을 TechClass enum으로 변환
+        TechClass techClass = TechClass.valueOf(searchCondition.getTechClass());
+        parameters.put("techClass", techClass);
+      } catch (IllegalArgumentException e) {
+        // 유효하지 않은 TechClass인 경우 빈 결과 반환
+        return Collections.emptyList();
       }
     }
 
-    Query query = new Query(criteria);
-    List<Question> questions = mongoTemplate.find(query, Question.class);
+    // 시작 날짜 조건 추가
+    if (searchCondition.getStartDate() != null) {
+      jpql.append(" AND q.createdAt >= :startDate");
+      parameters.put("startDate", searchCondition.getStartDate());
+    }
 
-    return questions.stream()
-        .map(QuestionResponse::of)
-        .toList();
+    // 종료 날짜 조건 추가
+    if (searchCondition.getEndDate() != null) {
+      jpql.append(" AND q.createdAt <= :endDate");
+      parameters.put("endDate", searchCondition.getEndDate());
+    }
+
+    // 정렬 추가 (최신순)
+    jpql.append(" ORDER BY q.createdAt DESC");
+
+    // 쿼리 생성 및 파라미터 설정
+    TypedQuery<Question> query = entityManager.createQuery(jpql.toString(), Question.class);
+    parameters.forEach(query::setParameter);
+
+    // 쿼리 실행 및 결과 변환
+    List<Question> questions = query.getResultList();
+    return questions.stream().map(QuestionResponse::of).toList();
+  }
+  private ParticipantQnA findParticipantByMemberId(Question question, Long memberId) {
+    // 참여자 리스트에서 찾기
+    if (question.getParticipants() != null) {
+      return question.getParticipants().stream()
+          .filter(p -> p.getMemberId().equals(memberId))
+          .findFirst()
+          .orElseThrow(() -> new CustomException(ErrorCode.NOT_PARTICIPANT));
+    }
+
+    throw new CustomException(ErrorCode.NOT_PARTICIPANT);
   }
 }

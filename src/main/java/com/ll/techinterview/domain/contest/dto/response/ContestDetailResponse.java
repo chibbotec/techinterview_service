@@ -1,8 +1,8 @@
 package com.ll.techinterview.domain.contest.dto.response;
 
-import com.ll.techinterview.domain.contest.document.Contest;
-import com.ll.techinterview.domain.contest.document.Participant;
-import com.ll.techinterview.domain.contest.service.Submit;
+import com.ll.techinterview.domain.contest.entity.Contest;
+import com.ll.techinterview.domain.contest.entity.Participant;
+import com.ll.techinterview.global.techEnum.Submit;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Builder;

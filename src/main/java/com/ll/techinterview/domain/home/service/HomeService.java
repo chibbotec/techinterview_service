@@ -1,11 +1,11 @@
 package com.ll.techinterview.domain.home.service;
 
-import com.ll.techinterview.domain.contest.document.Contest;
+import com.ll.techinterview.domain.contest.entity.Contest;
 import com.ll.techinterview.domain.contest.repository.ContestRepository;
 import com.ll.techinterview.domain.home.dto.response.StatusResponse;
 import com.ll.techinterview.domain.note.document.Note;
 import com.ll.techinterview.domain.note.repository.NoteRepository;
-import com.ll.techinterview.domain.qna.document.Question;
+import com.ll.techinterview.domain.qna.entity.Question;
 import com.ll.techinterview.domain.qna.repository.QuestionRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;

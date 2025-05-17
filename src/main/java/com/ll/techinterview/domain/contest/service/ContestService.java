@@ -1,16 +1,18 @@
 package com.ll.techinterview.domain.contest.service;
 
-import com.ll.techinterview.domain.contest.document.Answer;
-import com.ll.techinterview.domain.contest.document.Contest;
-import com.ll.techinterview.domain.contest.document.Participant;
-import com.ll.techinterview.domain.contest.document.Problem;
 import com.ll.techinterview.domain.contest.dto.request.ContestCreateRequest;
 import com.ll.techinterview.domain.contest.dto.request.ContestSubmitRequest;
 import com.ll.techinterview.domain.contest.dto.response.ContestDetailResponse;
 import com.ll.techinterview.domain.contest.dto.response.ContestSummaryResponse;
+import com.ll.techinterview.domain.contest.entity.Answer;
+import com.ll.techinterview.domain.contest.entity.Contest;
+import com.ll.techinterview.domain.contest.entity.Participant;
+import com.ll.techinterview.domain.contest.entity.Problem;
 import com.ll.techinterview.domain.contest.repository.ContestRepository;
+import com.ll.techinterview.domain.qna.repository.TechInterviewRepository;
 import com.ll.techinterview.global.error.ErrorCode;
 import com.ll.techinterview.global.exception.CustomException;
+import com.ll.techinterview.global.techEnum.Submit;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ContestService {
 
   private final ContestRepository contestRepository;
+  private final TechInterviewRepository techInterviewRepository;
 
   public List<ContestSummaryResponse> getContestList(Long spaceId) {
 
@@ -41,17 +44,17 @@ public class ContestService {
   }
 
   @Transactional
-  public void createContest(Long spaceId, ContestCreateRequest contestCreateRequest) {
+  public void createContest(Long spaceId, ContestCreateRequest request) {
     // Contest 엔티티 생성
     Contest contest = Contest.builder()
         .spaceId(spaceId)
-        .title(contestCreateRequest.getTitle())
-        .timeoutMillis(contestCreateRequest.getTimeoutMillis())
+        .title(request.getTitle())
+        .timeoutMillis(request.getTimeoutMillis())
         .submit(Submit.IN_PROGRESS)
         .build();
 
     // 1. 참가자(Participant) 엔티티 생성
-    List<Participant> participants = contestCreateRequest.getParticipants().stream()
+    List<Participant> participants = request.getParticipants().stream()
         .map(memberResponse -> {
           Participant participant = Participant.builder()
               .memberId(memberResponse.getId())
@@ -64,12 +67,12 @@ public class ContestService {
         .toList();
 
     // 2. 문제(Problem) 엔티티 생성
-    List<Problem> problems = contestCreateRequest.getProblems().stream()
+    List<Problem> problems = request.getProblems().stream()
         .map(problemContent -> {
           Problem problem = Problem.builder()
-              .problem(problemContent.getQuestionText())
-              .techClass(problemContent.getTechClass())
-              .aiAnswer(problemContent.getAiAnswer())
+              .techInterview(techInterviewRepository.findById(problemContent.getProblemId()).orElseThrow(
+                  () -> new CustomException(ErrorCode.TECH_INTERVIEW_NOT_FOUND)
+              ))
               .answers(List.of())
               .contest(contest) // Contest 설정
               .build();

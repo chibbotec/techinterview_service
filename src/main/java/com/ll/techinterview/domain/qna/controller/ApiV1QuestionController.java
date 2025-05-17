@@ -2,8 +2,8 @@ package com.ll.techinterview.domain.qna.controller;
 
 import com.ll.techinterview.domain.qna.dto.request.QuestionAnswerRequest;
 import com.ll.techinterview.domain.qna.dto.request.QuestionCreateRequest;
-import com.ll.techinterview.domain.qna.dto.QuestionResponse;
 import com.ll.techinterview.domain.qna.dto.request.SearchCondition;
+import com.ll.techinterview.domain.qna.dto.response.QuestionResponse;
 import com.ll.techinterview.domain.qna.service.QuestionService;
 import com.ll.techinterview.global.client.MemberResponse;
 import com.ll.techinterview.global.webMvc.LoginUser;
@@ -44,14 +44,14 @@ public class ApiV1QuestionController {
 
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> deleteQuestion(
-      @PathVariable("id") String id) {
+      @PathVariable("id") Long id) {
     questionService.deleteQuestion(id);
     return ResponseEntity.noContent().build();
   }
 
   @GetMapping("/{id}")
   public ResponseEntity<QuestionResponse> getQuestion(
-      @PathVariable("id") String id) {
+      @PathVariable("id") Long id) {
     return ResponseEntity.ok(questionService.getQuestion(id));
   }
 
@@ -61,22 +61,6 @@ public class ApiV1QuestionController {
       @RequestBody QuestionAnswerRequest request) {
 
     return ResponseEntity.ok(questionService.addAnswer(loginUser, request));
-  }
-
-  // 참여자 추가 API
-  @PostMapping("/addParticipants")
-  public ResponseEntity<List<QuestionResponse>> addParticipant(
-      @PathVariable("spaceId") Long spaceId,
-      @RequestBody MemberResponse request) {
-    return ResponseEntity.ok(questionService.addParticipant(spaceId, request));
-  }
-
-  // 참여자 제거 API  @PostMapping("/addParticipants")
-  @PostMapping("/removeParticipants")
-  public ResponseEntity<List<QuestionResponse>> removeParticipant(
-      @PathVariable("spaceId") Long spaceId,
-      @RequestBody MemberResponse request) {
-    return ResponseEntity.ok(questionService.removeParticipant(spaceId, request));
   }
 
   @PostMapping("/search")

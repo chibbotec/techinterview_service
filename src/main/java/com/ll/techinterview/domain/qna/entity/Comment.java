@@ -1,15 +1,12 @@
-package com.ll.techinterview.domain.contest.document;
+package com.ll.techinterview.domain.qna.entity;
 
-import com.ll.techinterview.domain.contest.service.Submit;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -24,20 +21,16 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 @Entity
-public class Participant {
+public class Comment {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  private Long memberId;
+  @ManyToOne(fetch = FetchType.LAZY)
+  private Question question;
 
-  private String nickname;
+  @ManyToOne(fetch = FetchType.LAZY)
+  private ParticipantQnA participantQna;
 
-  private Submit submit;
-
-  @ManyToOne
-  private Contest contest;
-
-  @OneToMany(mappedBy = "participant", cascade = CascadeType.ALL)
-  private List<Answer> answers;
+  private String comment;
 }
