@@ -73,7 +73,7 @@ class ServiceManager:
     def _run_container(self, name: str, port: int) -> None:
         os.system(
             f"docker run -d --name={name} --network=chibbotec-network "
-            f"--network-alias=techinterview_service "
+            f"--network-alias=techinterview "
             f"--restart unless-stopped -p {port}:9040 -e TZ=Asia/Seoul "
             f"-v /dockerProjects/chibbotec/techinterview_service/volumes/gen:/gen "
             f"--pull always ghcr.io/chibbotec/techinterview_service")
