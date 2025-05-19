@@ -1,6 +1,7 @@
 package com.ll.techinterview.global.config;
 
 import com.ll.techinterview.global.monitoring.JPAQueryMetricsListener;
+import com.ll.techinterview.global.monitoring.P6SpyEventListener;
 import lombok.RequiredArgsConstructor;
 import net.ttddyy.dsproxy.listener.ChainListener;
 import net.ttddyy.dsproxy.listener.DataSourceQueryCountListener;
@@ -18,6 +19,7 @@ import java.sql.SQLException;
 public class DataSourceConfig {
 
   private final JPAQueryMetricsListener jpaQueryMetricsListener;
+  private final P6SpyEventListener p6SpyEventListener;
 
   @Bean
   @Primary
@@ -28,6 +30,7 @@ public class DataSourceConfig {
     ChainListener chainListener = new ChainListener();
     chainListener.addListener(new DataSourceQueryCountListener());
     chainListener.addListener(jpaQueryMetricsListener);
+    chainListener.addListener(p6SpyEventListener);
 
     // 프록시 데이터소스 생성
     return ProxyDataSourceBuilder

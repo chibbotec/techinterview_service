@@ -167,6 +167,7 @@ public class JPAQueryMetricsListener implements QueryExecutionListener {
       long executionTime, String sql) {
     try {
       Map<String, Object> logData = new HashMap<>();
+      logData.put("source", "jpa");
       logData.put("time", time);
       logData.put("service", service);
       logData.put("type", type);
