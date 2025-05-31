@@ -1,7 +1,7 @@
 package com.ll.techinterview.domain.contest.dto.response;
 
 import com.ll.techinterview.domain.contest.entity.Problem;
-import com.ll.techinterview.global.techEnum.TechClass;
+import com.ll.techinterview.global.enums.TechClass;
 import java.util.List;
 import lombok.Builder;
 import lombok.Getter;

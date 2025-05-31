@@ -2,8 +2,11 @@ package com.ll.techinterview.domain.qna.service;
 
 
 import com.ll.techinterview.domain.qna.dto.request.QuestionAnswerRequest;
+import com.ll.techinterview.domain.qna.dto.request.QuestionCreateDbRequest;
 import com.ll.techinterview.domain.qna.dto.request.QuestionCreateRequest;
+import com.ll.techinterview.domain.qna.dto.request.QuestionCreateRequest.Questions;
 import com.ll.techinterview.domain.qna.dto.request.SearchCondition;
+import com.ll.techinterview.domain.qna.dto.response.DefaultQuestionResponse;
 import com.ll.techinterview.domain.qna.dto.response.QuestionResponse;
 import com.ll.techinterview.domain.qna.entity.Comment;
 import com.ll.techinterview.domain.qna.entity.ParticipantQnA;
@@ -11,10 +14,11 @@ import com.ll.techinterview.domain.qna.entity.Question;
 import com.ll.techinterview.domain.qna.repository.QuestionRepository;
 import com.ll.techinterview.domain.qna.repository.TechInterviewRepository;
 import com.ll.techinterview.global.client.MemberResponse;
+import com.ll.techinterview.global.enums.InterviewType;
+import com.ll.techinterview.global.enums.TechClass;
 import com.ll.techinterview.global.error.ErrorCode;
 import com.ll.techinterview.global.exception.CustomException;
 import com.ll.techinterview.global.jpa.TechInterview;
-import com.ll.techinterview.global.techEnum.TechClass;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
@@ -40,45 +44,95 @@ public class QuestionService {
   private EntityManager entityManager;
 
   @Transactional
-  public QuestionResponse createQuestion(MemberResponse loginUser, Long spaceId,
-      QuestionCreateRequest request) {
+  public List<QuestionResponse> createQuestionInDB(MemberResponse loginUser, Long spaceId,
+      QuestionCreateDbRequest request) {
+    List<TechInterview> techInterviews = techInterviewRepository.findAllById(
+        request.getQuestionIds());
 
-    // 1. TechInterview 객체 생성 및 저장
-    TechInterview techInterview = TechInterview.builder()
-        .techClass(request.getTechClass())
-        .question(request.getQuestionText())
-        .build();
+    if (techInterviews.isEmpty()) {
+      throw new CustomException(ErrorCode.TECH_INTERVIEW_NOT_FOUND);
+    }
 
-    TechInterview savedTechInterview = techInterviewRepository.save(techInterview);
-
-    // 2. Question 객체 생성
-    Question question = Question.builder()
-        .spaceId(spaceId)
-        .authorId(loginUser.getId())
-        .authorNickname(loginUser.getNickname())
-        .techInterview(savedTechInterview)  // 중요: 저장된 TechInterview 설정
-        .comments(new ArrayList<>())
-        .participants(new ArrayList<>())
-        .build();
-
-    // 3. ParticipantQnA 객체 생성 및 양방향 관계 설정
-    List<ParticipantQnA> participants = request.getParticipants().stream().map(
-        participantRequest -> {
-          ParticipantQnA participant = ParticipantQnA.builder()
-              .memberId(participantRequest.getId())
-              .nickname(participantRequest.getNickname())
+    List<Question> questions = techInterviews.stream().map(
+        techInterview -> {
+          Question question = Question.builder()
+              .spaceId(spaceId)
+              .authorId(loginUser.getId())
+              .authorNickname(loginUser.getNickname())
+              .techInterview(techInterview)
+              .comments(new ArrayList<>())
+              .participants(new ArrayList<>())
               .build();
-          participant.setQuestion(question); // 양방향 관계의 주인쪽 설정
-          return participant;
+
+          List<ParticipantQnA> participants = request.getParticipants().stream().map(
+              participantRequest -> {
+                ParticipantQnA participant = ParticipantQnA.builder()
+                    .memberId(participantRequest.getId())
+                    .nickname(participantRequest.getNickname())
+                    .build();
+                participant.setQuestion(question); // 양방향 관계의 주인쪽 설정
+                return participant;
+              }
+          ).collect(Collectors.toList());
+
+          // 이 부분이 빠져있었습니다!
+          question.setParticipants(participants);
+
+          return question; // 이것도 빠져있었습니다!
         }
     ).collect(Collectors.toList());
 
-    // 4. Question에 participants 설정
-    question.setParticipants(participants);
+    List<Question> savedQuestions = questionRepository.saveAll(questions);
+    return savedQuestions.stream().map(QuestionResponse::of).collect(Collectors.toList());
+  }
+
+  @Transactional
+  public List<QuestionResponse> createQuestion(MemberResponse loginUser, Long spaceId,
+      QuestionCreateRequest request) {
+
+    List<Question> savedQuestions = new ArrayList<>();
+
+    for (Questions question : request.getQuestions()) {
+      // 1. TechInterview 객체 생성 및 저장
+      TechInterview techInterview = TechInterview.builder()
+          .techClass(question.getTechClass())
+          .question(question.getQuestionText())
+          .interviewType(question.getInterviewType())
+          .build();
+
+      TechInterview savedTechInterview = techInterviewRepository.save(techInterview);
+
+      // 2. Question 객체 생성
+      Question newQuestion = Question.builder()
+          .spaceId(spaceId)
+          .authorId(loginUser.getId())
+          .authorNickname(loginUser.getNickname())
+          .techInterview(savedTechInterview)  // 중요: 저장된 TechInterview 설정
+          .comments(new ArrayList<>())
+          .participants(new ArrayList<>())
+          .build();
+
+      // 3. ParticipantQnA 객체 생성 및 양방향 관계 설정
+      List<ParticipantQnA> participants = request.getParticipants().stream().map(
+          participantRequest -> {
+            ParticipantQnA participant = ParticipantQnA.builder()
+                .memberId(participantRequest.getId())
+                .nickname(participantRequest.getNickname())
+                .build();
+            participant.setQuestion(newQuestion); // 양방향 관계의 주인쪽 설정
+            return participant;
+          }
+      ).collect(Collectors.toList());
+
+      // 4. Question에 participants 설정
+      newQuestion.setParticipants(participants);
+
+      savedQuestions.add(newQuestion);
+    }
 
     // 5. Question 저장 및 반환
-    Question savedQuestion = questionRepository.save(question);
-    return QuestionResponse.of(savedQuestion);
+    List<Question> savedQuestions2 = questionRepository.saveAll(savedQuestions);
+    return savedQuestions2.stream().map(QuestionResponse::of).collect(Collectors.toList());
   }
 
 
@@ -136,7 +190,8 @@ public class QuestionService {
 
   public List<QuestionResponse> searchQuestions(Long spaceId, SearchCondition searchCondition) {
     // 기본 검색 조건: spaceId 일치
-    StringBuilder jpql = new StringBuilder("SELECT q FROM Question q JOIN q.techInterview t WHERE q.spaceId = :spaceId");
+    StringBuilder jpql = new StringBuilder(
+        "SELECT q FROM Question q JOIN q.techInterview t WHERE q.spaceId = :spaceId");
 
     // 파라미터 맵 생성
     Map<String, Object> parameters = new HashMap<>();
@@ -178,6 +233,7 @@ public class QuestionService {
     List<Question> questions = query.getResultList();
     return questions.stream().map(QuestionResponse::of).toList();
   }
+
   private ParticipantQnA findParticipantByMemberId(Question question, Long memberId) {
     // 참여자 리스트에서 찾기
     if (question.getParticipants() != null) {
@@ -189,4 +245,14 @@ public class QuestionService {
 
     throw new CustomException(ErrorCode.NOT_PARTICIPANT);
   }
+
+  public List<DefaultQuestionResponse> getQuestionListFromDB(InterviewType interviewType) {
+    List<TechInterview> defaultQuestions = techInterviewRepository.findByInterviewType(interviewType);
+
+    return defaultQuestions.stream().map(
+        techInterview -> (DefaultQuestionResponse.from(techInterview))
+    ).toList();
+  }
+
+
 }

@@ -1,4 +1,4 @@
-package com.ll.techinterview.global.techEnum;
+package com.ll.techinterview.global.enums;
 
 public enum Submit {
   IN_PROGRESS, //진행중

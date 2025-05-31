@@ -1,4 +1,4 @@
-package com.ll.techinterview.global.techEnum;
+package com.ll.techinterview.global.enums;
 
 public enum TechClass {
   JAVASCRIPT("JavaScript"),
@@ -15,11 +15,12 @@ public enum TechClass {
   DEVOPS("DevOps"),
   MOBILE("Mobile"),
   ALGORITHM("Algorithm"),
-  COMPUTER_SCIENCE("Computer Science"),
+  CS("Computer Science"),
   OS("OS"),
   NETWORK("Network"),
   SECURITY("Security"),
   CLOUD("Cloud"),
+  CSS("CSS"),
   ETC("ETC");
 
   private final String displayName;

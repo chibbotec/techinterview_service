@@ -29,8 +29,8 @@ public class DataSourceConfig {
     // 리스너 체인 생성
     ChainListener chainListener = new ChainListener();
     chainListener.addListener(new DataSourceQueryCountListener());
-    chainListener.addListener(jpaQueryMetricsListener);
-    chainListener.addListener(p6SpyEventListener);
+//    chainListener.addListener(jpaQueryMetricsListener);
+//    chainListener.addListener(p6SpyEventListener);
 
     // 프록시 데이터소스 생성
     return ProxyDataSourceBuilder

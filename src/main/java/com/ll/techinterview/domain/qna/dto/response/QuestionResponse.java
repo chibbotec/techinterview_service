@@ -2,7 +2,7 @@ package com.ll.techinterview.domain.qna.dto.response;
 
 import com.ll.techinterview.domain.qna.entity.ParticipantQnA;
 import com.ll.techinterview.domain.qna.entity.Question;
-import com.ll.techinterview.global.techEnum.TechClass;
+import com.ll.techinterview.global.enums.TechClass;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -17,6 +17,7 @@ import lombok.NoArgsConstructor;
 public class QuestionResponse {
   private Long id;
   private Long spaceId;
+  private Long techInterviewId;
   private TechClass techClass;
   private String aiAnswer;
   private String keyPoints;
@@ -32,6 +33,7 @@ public class QuestionResponse {
     return QuestionResponse.builder()
         .id(question.getId())
         .spaceId(question.getSpaceId())
+        .techInterviewId(question.getTechInterview().getId())
         .techClass(question.getTechInterview().getTechClass())
         .questionText(question.getTechInterview().getQuestion())
         .aiAnswer(question.getTechInterview().getAiAnswer())

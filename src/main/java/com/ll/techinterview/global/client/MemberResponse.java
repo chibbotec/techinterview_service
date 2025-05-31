@@ -1,6 +1,6 @@
 package com.ll.techinterview.global.client;
 
-import com.ll.techinterview.global.techEnum.Submit;
+import com.ll.techinterview.global.enums.Submit;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

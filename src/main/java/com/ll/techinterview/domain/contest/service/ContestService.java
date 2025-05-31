@@ -12,7 +12,7 @@ import com.ll.techinterview.domain.contest.repository.ContestRepository;
 import com.ll.techinterview.domain.qna.repository.TechInterviewRepository;
 import com.ll.techinterview.global.error.ErrorCode;
 import com.ll.techinterview.global.exception.CustomException;
-import com.ll.techinterview.global.techEnum.Submit;
+import com.ll.techinterview.global.enums.Submit;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

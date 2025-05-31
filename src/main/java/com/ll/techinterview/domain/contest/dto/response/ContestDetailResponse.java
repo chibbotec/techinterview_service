@@ -2,7 +2,7 @@ package com.ll.techinterview.domain.contest.dto.response;
 
 import com.ll.techinterview.domain.contest.entity.Contest;
 import com.ll.techinterview.domain.contest.entity.Participant;
-import com.ll.techinterview.global.techEnum.Submit;
+import com.ll.techinterview.global.enums.Submit;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Builder;

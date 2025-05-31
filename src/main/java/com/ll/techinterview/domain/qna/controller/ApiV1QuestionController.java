@@ -1,11 +1,14 @@
 package com.ll.techinterview.domain.qna.controller;
 
 import com.ll.techinterview.domain.qna.dto.request.QuestionAnswerRequest;
+import com.ll.techinterview.domain.qna.dto.request.QuestionCreateDbRequest;
 import com.ll.techinterview.domain.qna.dto.request.QuestionCreateRequest;
 import com.ll.techinterview.domain.qna.dto.request.SearchCondition;
+import com.ll.techinterview.domain.qna.dto.response.DefaultQuestionResponse;
 import com.ll.techinterview.domain.qna.dto.response.QuestionResponse;
 import com.ll.techinterview.domain.qna.service.QuestionService;
 import com.ll.techinterview.global.client.MemberResponse;
+import com.ll.techinterview.global.enums.InterviewType;
 import com.ll.techinterview.global.webMvc.LoginUser;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -27,8 +30,23 @@ public class ApiV1QuestionController {
 
   private final QuestionService questionService;
 
+  @GetMapping("/db/{interviewType}")
+  public ResponseEntity<List<DefaultQuestionResponse>> getDefaultQuestionList(
+      @PathVariable("interviewType") InterviewType interviewType
+  ) {
+    return ResponseEntity.ok(questionService.getQuestionListFromDB(interviewType));
+  }
+
+  @PostMapping("/db")
+  public ResponseEntity<List<QuestionResponse>> createQuestionInDB(
+      @LoginUser MemberResponse loginUser,
+      @PathVariable("spaceId") Long spaceId,
+      @RequestBody QuestionCreateDbRequest request) {
+    return ResponseEntity.ok(questionService.createQuestionInDB(loginUser, spaceId, request));
+  }
+
   @PostMapping
-  public ResponseEntity<QuestionResponse> createQuestion(
+  public ResponseEntity<List<QuestionResponse>> createQuestion(
       @LoginUser MemberResponse loginUser,
       @PathVariable("spaceId") Long spaceId,
       @RequestBody QuestionCreateRequest request) {

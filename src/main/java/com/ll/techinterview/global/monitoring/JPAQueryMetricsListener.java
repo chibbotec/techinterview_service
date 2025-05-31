@@ -175,7 +175,7 @@ public class JPAQueryMetricsListener implements QueryExecutionListener {
       logData.put("sql", sql);
 
       // Admin 서비스로 POST 요청 보내기
-      restTemplate.postForEntity("http://admin:9100/api/metrics/log", logData, Void.class);
+//      restTemplate.postForEntity("http://admin:9100/api/metrics/log", logData, Void.class);
     } catch (Exception e) {
       log.error("Admin 서비스에 로그 전송 실패: {}", e.getMessage());
     }

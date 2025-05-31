@@ -2,7 +2,8 @@ package com.ll.techinterview.global.jpa;
 
 import com.ll.techinterview.domain.contest.entity.Problem;
 import com.ll.techinterview.domain.qna.entity.Question;
-import com.ll.techinterview.global.techEnum.TechClass;
+import com.ll.techinterview.global.enums.InterviewType;
+import com.ll.techinterview.global.enums.TechClass;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -48,6 +49,9 @@ public class TechInterview {
 
   @Column(name = "additional_topics", columnDefinition = "TEXT")
   private String additionalTopics;
+
+  @Column(name = "type")
+  private InterviewType interviewType;
 
   @OneToMany(mappedBy = "techInterview")
   private List<Problem> problems = new ArrayList<>();

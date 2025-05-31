@@ -1,6 +1,6 @@
 package com.ll.techinterview.domain.contest.entity;
 
-import com.ll.techinterview.global.techEnum.Submit;
+import com.ll.techinterview.global.enums.Submit;
 import com.ll.techinterview.global.jpa.Member;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
