@@ -95,10 +95,14 @@ public class ApiV1QuestionController {
   }
 
   @PostMapping("/search")
-  public ResponseEntity<List<QuestionResponse>> search(
+  public ResponseEntity<Page<QuestionResponse>> search(
       @PathVariable("spaceId") Long spaceId,
-      @RequestBody SearchCondition searchCondition
+      @RequestBody SearchCondition searchCondition,
+      @PageableDefault(
+          size = 20,
+          sort = "createdAt",
+          direction = Direction.DESC) Pageable pageable
   ){
-    return ResponseEntity.ok(questionService.searchQuestions(spaceId, searchCondition));
+    return ResponseEntity.ok(questionService.searchQuestions(spaceId, searchCondition, pageable));
   }
 }

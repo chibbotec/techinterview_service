@@ -135,4 +135,13 @@ public class ContestService {
       contest.setSubmit(Submit.COMPLETED);
     }
   }
+
+  @Transactional
+  public void deleteContest(Long contestId) {
+    Contest contest = contestRepository.findById(contestId).orElseThrow(() ->
+        new CustomException(ErrorCode.CONTEST_NOT_FOUND)
+    );
+
+    contestRepository.delete(contest);
+  }
 }

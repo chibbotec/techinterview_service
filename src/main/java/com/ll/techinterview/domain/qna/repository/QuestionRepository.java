@@ -3,6 +3,7 @@ package com.ll.techinterview.domain.qna.repository;
 
 import com.ll.techinterview.domain.qna.entity.Question;
 import com.ll.techinterview.global.enums.TechClass;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +24,18 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
   Page<Question> findBySpaceIdAndTechInterviewTechClass(
       @Param("spaceId") Long spaceId,
       @Param("techClass") TechClass techClass,
+      Pageable pageable
+  );
+
+  @Query("SELECT q FROM Question q JOIN q.techInterview t WHERE q.spaceId = :spaceId " +
+      "AND (:techClass IS NULL OR t.techClass = :techClass) " +
+      "AND (:startDate IS NULL OR q.createdAt >= :startDate) " +
+      "AND (:endDate IS NULL OR q.createdAt <= :endDate)")
+  Page<Question> findBySearchCondition(
+      @Param("spaceId") Long spaceId,
+      @Param("techClass") TechClass techClass,
+      @Param("startDate") LocalDateTime startDate,
+      @Param("endDate") LocalDateTime endDate,
       Pageable pageable
   );
 }

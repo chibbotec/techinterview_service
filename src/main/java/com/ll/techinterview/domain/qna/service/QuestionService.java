@@ -21,12 +21,8 @@ import com.ll.techinterview.global.exception.CustomException;
 import com.ll.techinterview.global.jpa.TechInterview;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.TypedQuery;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -199,50 +195,17 @@ public class QuestionService {
     questionRepository.delete(question);
   }
 
-  public List<QuestionResponse> searchQuestions(Long spaceId, SearchCondition searchCondition) {
-    // 기본 검색 조건: spaceId 일치
-    StringBuilder jpql = new StringBuilder(
-        "SELECT q FROM Question q JOIN q.techInterview t WHERE q.spaceId = :spaceId");
+  public Page<QuestionResponse> searchQuestions(Long spaceId, SearchCondition searchCondition, Pageable pageable) {
 
-    // 파라미터 맵 생성
-    Map<String, Object> parameters = new HashMap<>();
-    parameters.put("spaceId", spaceId);
+    Page<Question> questions = questionRepository.findBySearchCondition(
+        spaceId,
+        searchCondition.getTechClass(),      // null 가능
+        searchCondition.getStartDate(),      // null 가능
+        searchCondition.getEndDate(),        // null 가능
+        pageable
+    );
 
-    // TechClass 조건 추가
-    if (searchCondition.getTechClass() != null && !searchCondition.getTechClass().isEmpty()) {
-      jpql.append(" AND t.techClass = :techClass");
-      try {
-        // String을 TechClass enum으로 변환
-        TechClass techClass = TechClass.valueOf(searchCondition.getTechClass());
-        parameters.put("techClass", techClass);
-      } catch (IllegalArgumentException e) {
-        // 유효하지 않은 TechClass인 경우 빈 결과 반환
-        return Collections.emptyList();
-      }
-    }
-
-    // 시작 날짜 조건 추가
-    if (searchCondition.getStartDate() != null) {
-      jpql.append(" AND q.createdAt >= :startDate");
-      parameters.put("startDate", searchCondition.getStartDate());
-    }
-
-    // 종료 날짜 조건 추가
-    if (searchCondition.getEndDate() != null) {
-      jpql.append(" AND q.createdAt <= :endDate");
-      parameters.put("endDate", searchCondition.getEndDate());
-    }
-
-    // 정렬 추가 (최신순)
-    jpql.append(" ORDER BY q.createdAt DESC");
-
-    // 쿼리 생성 및 파라미터 설정
-    TypedQuery<Question> query = entityManager.createQuery(jpql.toString(), Question.class);
-    parameters.forEach(query::setParameter);
-
-    // 쿼리 실행 및 결과 변환
-    List<Question> questions = query.getResultList();
-    return questions.stream().map(QuestionResponse::of).toList();
+    return questions.map(QuestionResponse::of);
   }
 
   private ParticipantQnA findParticipantByMemberId(Question question, Long memberId) {
