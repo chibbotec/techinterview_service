@@ -9,10 +9,15 @@ import com.ll.techinterview.domain.qna.dto.response.QuestionResponse;
 import com.ll.techinterview.domain.qna.service.QuestionService;
 import com.ll.techinterview.global.client.MemberResponse;
 import com.ll.techinterview.global.enums.InterviewType;
+import com.ll.techinterview.global.enums.TechClass;
 import com.ll.techinterview.global.webMvc.LoginUser;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +25,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -31,10 +37,12 @@ public class ApiV1QuestionController {
   private final QuestionService questionService;
 
   @GetMapping("/db/{interviewType}")
-  public ResponseEntity<List<DefaultQuestionResponse>> getDefaultQuestionList(
-      @PathVariable("interviewType") InterviewType interviewType
+  public ResponseEntity<Page<DefaultQuestionResponse>> getDefaultQuestionList(
+      @PathVariable("interviewType") InterviewType interviewType,
+      @RequestParam(value = "tech-class", required = false) TechClass techClass,
+      @PageableDefault(size = 8) Pageable pageable
   ) {
-    return ResponseEntity.ok(questionService.getQuestionListFromDB(interviewType));
+    return ResponseEntity.ok(questionService.getQuestionListFromDB(interviewType, techClass, pageable));
   }
 
   @PostMapping("/db")
@@ -54,10 +62,15 @@ public class ApiV1QuestionController {
   }
 
   @GetMapping
-  public ResponseEntity<List<QuestionResponse>> getQuestionList(
-      @PathVariable("spaceId") Long spaceId
+  public ResponseEntity<Page<QuestionResponse>> getQuestionList(
+      @PathVariable("spaceId") Long spaceId,
+      @RequestParam (value = "tech-class", required = false) TechClass techClass,
+      @PageableDefault(
+          size = 20,
+          sort = "createdAt",
+          direction = Direction.DESC) Pageable pageable
   ) {
-    return ResponseEntity.ok(questionService.getQuestionList(spaceId));
+    return ResponseEntity.ok(questionService.getQuestionList(spaceId, techClass, pageable));
   }
 
   @DeleteMapping("/{id}")

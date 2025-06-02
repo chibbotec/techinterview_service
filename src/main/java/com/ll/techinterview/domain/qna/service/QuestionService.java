@@ -30,6 +30,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -136,9 +138,18 @@ public class QuestionService {
   }
 
 
-  public List<QuestionResponse> getQuestionList(Long spaceId) {
-    List<Question> questions = questionRepository.findBySpaceId(spaceId);
-    return questions.stream().map(QuestionResponse::of).toList();
+  public Page<QuestionResponse> getQuestionList(Long spaceId, TechClass techClass, Pageable pageable) {
+
+    Page<Question> questions;
+
+    if( techClass == null) {
+      // techClass가 null인 경우, spaceId만으로 조회
+      questions = questionRepository.findBySpaceId(spaceId, pageable);
+      return questions.map(QuestionResponse::of);
+    }
+
+    questions = questionRepository.findBySpaceIdAndTechInterviewTechClass(spaceId, techClass, pageable);
+    return questions.map(QuestionResponse::of);
   }
 
   public QuestionResponse getQuestion(Long id) {
@@ -246,13 +257,22 @@ public class QuestionService {
     throw new CustomException(ErrorCode.NOT_PARTICIPANT);
   }
 
-  public List<DefaultQuestionResponse> getQuestionListFromDB(InterviewType interviewType) {
-    List<TechInterview> defaultQuestions = techInterviewRepository.findByInterviewType(interviewType);
+  public Page<DefaultQuestionResponse> getQuestionListFromDB(
+      InterviewType interviewType,
+      TechClass techClass,
+      Pageable pageable) {
+    Page<TechInterview> questionPage;
 
-    return defaultQuestions.stream().map(
-        techInterview -> (DefaultQuestionResponse.from(techInterview))
-    ).toList();
+    if (techClass != null) {
+      // 두 조건 모두 적용
+      questionPage = techInterviewRepository
+          .findByInterviewTypeAndTechClass(interviewType, techClass, pageable);
+    } else {
+      // interviewType만 적용
+      questionPage = techInterviewRepository
+          .findByInterviewType(interviewType, pageable);
+    }
+    return questionPage.map(DefaultQuestionResponse::from);
   }
-
 
 }

@@ -1,5 +1,6 @@
 package com.ll.techinterview.domain.qna.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
@@ -32,5 +33,6 @@ public class Comment {
   @ManyToOne(fetch = FetchType.LAZY)
   private ParticipantQnA participantQna;
 
+  @Column(columnDefinition = "TEXT")
   private String comment;
 }
