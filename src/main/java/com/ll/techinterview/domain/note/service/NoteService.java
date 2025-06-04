@@ -80,4 +80,16 @@ public class NoteService {
     // 4. 저장 및 응답 반환
     return NoteResponse.of(noteRepository.save(note));
   }
+
+  public void deleteNote(String noteId, MemberResponse loginUser) {
+    Note note = noteRepository.findById(noteId)
+        .orElseThrow(() -> new IllegalArgumentException("Note not found"));
+
+    // 2. 접근 권한 확인
+    if(!note.getAuthor().getId().equals(loginUser.getId())) {
+      throw new CustomException(ErrorCode.NOTE_ACCESS_DENIED);
+    }
+
+    noteRepository.delete(note);
+  }
 }

@@ -10,6 +10,7 @@ import com.ll.techinterview.global.webMvc.LoginUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -57,6 +58,15 @@ public class ApiV1NoteController {
       @RequestBody NoteRequest noteRequest
   ){
     return ResponseEntity.ok(noteService.updateNote(noteId, loginUser, noteRequest));
+  }
+
+  @DeleteMapping("/{noteId}")
+  public ResponseEntity deleteNote(
+      @PathVariable("noteId") String noteId,
+      @LoginUser MemberResponse loginUser
+  ){
+    noteService.deleteNote(noteId, loginUser);
+    return ResponseEntity.ok().build();
   }
 
 }
