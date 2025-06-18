@@ -71,7 +71,7 @@ public class ContestService {
 
 // 1. AI 답변이 있는 것만 필터링
     List<TechInterview> validTechInterviews = techInterviews.stream()
-        .filter(interview -> !interview.getAiAnswer().isEmpty())
+        .filter(interview -> interview.getAiAnswer() != null && !interview.getAiAnswer().isEmpty())
         .toList();
 
 // 2. 필터링 후 개수 체크
