@@ -18,6 +18,6 @@ public interface TechInterviewRepository extends JpaRepository<TechInterview, Lo
   Page<TechInterview> findByInterviewTypeAndTechClass(
       InterviewType type, TechClass techClass, Pageable pageable);
 
-  List<TechInterview> findByTechClass(List<TechClass> techClasses);
+  List<TechInterview> findByTechClassIn(List<TechClass> techClasses);
 
 }

@@ -67,7 +67,7 @@ public class ContestService {
         })
         .toList();
 
-    List<TechInterview> techInterviews = techInterviewRepository.findByTechClass(request.getTechClasses());
+    List<TechInterview> techInterviews = techInterviewRepository.findByTechClassIn(request.getTechClasses());
     if( techInterviews.isEmpty()) {
       throw new CustomException(ErrorCode.TECH_INTERVIEW_NOT_FOUND);
     } else if( techInterviews.size() < request.getRandomCount()) {
