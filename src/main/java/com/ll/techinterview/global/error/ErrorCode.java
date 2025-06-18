@@ -49,6 +49,8 @@ public enum ErrorCode {
     ADD_PARTICIPANT_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "참여자 추가에 실패했습니다."),
     PARTICIPANT_NOT_FOUND(HttpStatus.NOT_FOUND, "참여자를 찾을 수 없습니다."),
     PROBLEM_NOT_FOUND(HttpStatus.NOT_FOUND, "문제를 찾을 수 없습니다."),
+    TECH_INTERVIEW_NOT_ENOUGH(HttpStatus.BAD_REQUEST, "기술면접이 충분하지 않습니다."),
+    TECH_INTERVIEW_AI_ANSWER_NOT_FOUND(HttpStatus.NOT_FOUND, "AI 답변을 찾을 수 없습니다."),
 
     CONTEST_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 대회를 찾을 수 없습니다."),
 

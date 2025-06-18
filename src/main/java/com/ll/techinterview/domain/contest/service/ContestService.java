@@ -1,6 +1,7 @@
 package com.ll.techinterview.domain.contest.service;
 
 import com.ll.techinterview.domain.contest.dto.request.ContestCreateRequest;
+import com.ll.techinterview.domain.contest.dto.request.ContestRandomRequest;
 import com.ll.techinterview.domain.contest.dto.request.ContestSubmitRequest;
 import com.ll.techinterview.domain.contest.dto.response.ContestDetailResponse;
 import com.ll.techinterview.domain.contest.dto.response.ContestSummaryResponse;
@@ -10,9 +11,11 @@ import com.ll.techinterview.domain.contest.entity.Participant;
 import com.ll.techinterview.domain.contest.entity.Problem;
 import com.ll.techinterview.domain.contest.repository.ContestRepository;
 import com.ll.techinterview.domain.qna.repository.TechInterviewRepository;
+import com.ll.techinterview.global.enums.Submit;
 import com.ll.techinterview.global.error.ErrorCode;
 import com.ll.techinterview.global.exception.CustomException;
-import com.ll.techinterview.global.enums.Submit;
+import com.ll.techinterview.global.jpa.TechInterview;
+import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -41,6 +44,57 @@ public class ContestService {
     );
 
     return ContestDetailResponse.of(contest);
+  }
+
+  @Transactional
+  public void createRandomContest(Long spaceId, ContestRandomRequest request) {
+    Contest contest = Contest.builder()
+        .spaceId(spaceId)
+        .title(request.getTitle())
+        .timeoutMillis(request.getTimeoutMillis())
+        .submit(Submit.IN_PROGRESS)
+        .build();
+
+    List<Participant> participants = request.getParticipants().stream()
+        .map(memberResponse -> {
+          Participant participant = Participant.builder()
+              .memberId(memberResponse.getId())
+              .nickname(memberResponse.getNickname())
+              .submit(Submit.IN_PROGRESS)
+              .contest(contest) // Contest 설정
+              .build();
+          return participant;
+        })
+        .toList();
+
+    List<TechInterview> techInterviews = techInterviewRepository.findByTechClass(request.getTechClasses());
+    if( techInterviews.isEmpty()) {
+      throw new CustomException(ErrorCode.TECH_INTERVIEW_NOT_FOUND);
+    } else if( techInterviews.size() < request.getRandomCount()) {
+      throw new CustomException(ErrorCode.TECH_INTERVIEW_NOT_ENOUGH);
+    }
+
+    Collections.shuffle(techInterviews);
+    List<TechInterview> selectedQuestions = techInterviews.subList(0, request.getRandomCount());
+
+    selectedQuestions.forEach(question -> {
+      if (question.getAiAnswer().isEmpty()){
+        throw new CustomException(ErrorCode.TECH_INTERVIEW_AI_ANSWER_NOT_FOUND);
+      }
+    });
+
+    List<Problem> problems = selectedQuestions.stream()
+        .map(techInterview -> Problem.builder()
+            .techInterview(techInterview)
+            .answers(Collections.emptyList())
+            .contest(contest) // Contest 설정
+            .build())
+        .toList();
+
+    contest.setParticipants(participants);
+    contest.setProblems(problems);
+
+    Contest savedContest = contestRepository.save(contest);
   }
 
   @Transactional

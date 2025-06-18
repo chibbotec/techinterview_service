@@ -1,6 +1,7 @@
 package com.ll.techinterview.domain.contest.controller;
 
 import com.ll.techinterview.domain.contest.dto.request.ContestCreateRequest;
+import com.ll.techinterview.domain.contest.dto.request.ContestRandomRequest;
 import com.ll.techinterview.domain.contest.dto.request.ContestSubmitRequest;
 import com.ll.techinterview.domain.contest.dto.response.ContestDetailResponse;
 import com.ll.techinterview.domain.contest.dto.response.ContestSummaryResponse;
@@ -53,6 +54,15 @@ public class ApiV1ContestController {
       @RequestBody ContestCreateRequest contestCreateRequest
   ){
     contestService.createContest(spaceId, contestCreateRequest);
+    return ResponseEntity.ok().build();
+  }
+
+  @PostMapping("/random")
+  public ResponseEntity randomContest(
+      @PathVariable("spaceId") Long spaceId,
+      @RequestBody ContestRandomRequest contestRandomRequest
+  ){
+    contestService.createRandomContest(spaceId, contestRandomRequest);
     return ResponseEntity.ok().build();
   }
 
