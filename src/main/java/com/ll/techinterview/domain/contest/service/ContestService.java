@@ -68,20 +68,22 @@ public class ContestService {
         .toList();
 
     List<TechInterview> techInterviews = techInterviewRepository.findByTechClassIn(request.getTechClasses());
-    if( techInterviews.isEmpty()) {
+
+// 1. AI 답변이 있는 것만 필터링
+    List<TechInterview> validTechInterviews = techInterviews.stream()
+        .filter(interview -> !interview.getAiAnswer().isEmpty())
+        .toList();
+
+// 2. 필터링 후 개수 체크
+    if(validTechInterviews.isEmpty()) {
       throw new CustomException(ErrorCode.TECH_INTERVIEW_NOT_FOUND);
-    } else if( techInterviews.size() < request.getRandomCount()) {
+    } else if(validTechInterviews.size() < request.getRandomCount()) {
       throw new CustomException(ErrorCode.TECH_INTERVIEW_NOT_ENOUGH);
     }
 
-    Collections.shuffle(techInterviews);
-    List<TechInterview> selectedQuestions = techInterviews.subList(0, request.getRandomCount());
-
-    selectedQuestions.forEach(question -> {
-      if (question.getAiAnswer().isEmpty()){
-        throw new CustomException(ErrorCode.TECH_INTERVIEW_AI_ANSWER_NOT_FOUND);
-      }
-    });
+// 3. 유효한 데이터에서 랜덤 선택
+    Collections.shuffle(validTechInterviews);
+    List<TechInterview> selectedQuestions = validTechInterviews.subList(0, request.getRandomCount());
 
     List<Problem> problems = selectedQuestions.stream()
         .map(techInterview -> Problem.builder()
