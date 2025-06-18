@@ -17,6 +17,7 @@ import com.ll.techinterview.global.exception.CustomException;
 import com.ll.techinterview.global.jpa.TechInterview;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -71,8 +72,8 @@ public class ContestService {
 
 // 1. AI 답변이 있는 것만 필터링
     List<TechInterview> validTechInterviews = techInterviews.stream()
-        .filter(interview -> interview.getAiAnswer() != null && !interview.getAiAnswer().isEmpty())
-        .toList();
+        .filter(interview -> interview.getAiAnswer() != null)
+        .collect(Collectors.toList());
 
 // 2. 필터링 후 개수 체크
     if(validTechInterviews.isEmpty()) {
